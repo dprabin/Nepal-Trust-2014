@@ -21,5 +21,7 @@ nepal-trust-2014_files
 2100.csv
 2100.txt
 
-# Mac file
+# Mac temp file
 .DS_Store
+# Mac trash
+.Trashes
