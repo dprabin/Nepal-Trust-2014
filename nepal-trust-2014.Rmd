@@ -53,15 +53,15 @@ dim(data)
 ```
 
 ###Rename column names of dataset to variable labels
-Column names should be renamed to some meaningful names. The labels obtained from variable labels attribute of SPSS file should be cleaned before using as column names of data frame.
+Column names should be renamed to some meaningful names. The labels obtained from variable labels attribute of SPSS file should be cleaned before using as column names of data frame. At this stage this is commented out because using question number in variable name is easier for me. For other users, it might be easier to use meaningful variable names. There are two types of names: one - replaced spaces and other illegal charactors to dots "." and Two: remove all punctuation marks altogether. Remove single hashses to get dot separated column name and Remove only single hash to get cleaner name.
 ```{r changeNamesOfColumns}
-#Find variable labels #variableLabels<-attr(mydata,"variable.labels")
-variableLabels<-character()
-for(i in 1:202){variableLabels[i]<-attr(data,"variable.labels")[[i]]}
-#Converts spaces and punctuations to dots(.)
-names(data)<-make.names(variableLabels,unique=TRUE)
-#Following code removes all punctuation marks too
-#names(data)<-gsub("[ [:punct:]]", "" , variableLabels)
+##Find variable labels #variableLabels<-attr(mydata,"variable.labels")
+#variableLabels<-character()
+#for(i in 1:202){variableLabels[i]<-attr(data,"variable.labels")[[i]]}
+##Converts spaces and punctuations to dots(.)
+#names(data)<-make.names(variableLabels,unique=TRUE)
+##Following code removes all punctuation marks too
+##names(data)<-gsub("[ [:punct:]]", "" , variableLabels)
 ```
 
 #Remove other specific  noises in data
@@ -175,11 +175,12 @@ d<-table(trustPeople)
 
 ###Gender vs bribe asked
 ```{r genderVersusBribeAsked}
-qplot(data$Corruption..In.recent.years.have.you.or.your.family.asked.by.bureaucrats.about.bribe.,data=data,fill=Gender,xlab="Have You ever been asked for bribe?")
+#qplot(data$Corruption..In.recent.years.have.you.or.your.family.asked.by.bureaucrats.about.bribe.,data=data,fill=Gender,xlab="Have You ever been asked for bribe?")
 ```
 
 
 ##All the data
+All the data is not necessary to print on html file. It will be printed on csv file.
 ```{r}
-data
+#data
 ```
