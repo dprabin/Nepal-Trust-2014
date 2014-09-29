@@ -52,12 +52,17 @@ data<-data[(!is.na(data$id)) | (!is.na(data$aq1)) | (!is.na(data$aq2)),]
 dim(data)
 ```
 
+###Find the variable labels
+Data files contains variable labels. We will read these variable labels to a new variable and store for future use.
+```{r}
+##Find variable labels #variableLabels<-attr(mydata,"variable.labels")
+variableLabels<-character()
+for(i in 1:202){variableLabels[i]<-attr(data,"variable.labels")[[i]]}
+```
+
 ###Rename column names of dataset to variable labels
 Column names should be renamed to some meaningful names. The labels obtained from variable labels attribute of SPSS file should be cleaned before using as column names of data frame. At this stage this is commented out because using question number in variable name is easier for me. For other users, it might be easier to use meaningful variable names. There are two types of names: one - replaced spaces and other illegal charactors to dots "." and Two: remove all punctuation marks altogether. Remove single hashses to get dot separated column name and Remove only single hash to get cleaner name. This will be uncommented once all the analysis are finished and we want to publish this data to public users.
 ```{r changeNamesOfColumns}
-##Find variable labels #variableLabels<-attr(mydata,"variable.labels")
-#variableLabels<-character()
-#for(i in 1:202){variableLabels[i]<-attr(data,"variable.labels")[[i]]}
 ##Converts spaces and punctuations to dots(.)
 #names(data)<-make.names(variableLabels,unique=TRUE)
 ##Following code removes all punctuation marks too
