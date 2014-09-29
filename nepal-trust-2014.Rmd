@@ -53,7 +53,7 @@ dim(data)
 ```
 
 ###Rename column names of dataset to variable labels
-Column names should be renamed to some meaningful names. The labels obtained from variable labels attribute of SPSS file should be cleaned before using as column names of data frame. At this stage this is commented out because using question number in variable name is easier for me. For other users, it might be easier to use meaningful variable names. There are two types of names: one - replaced spaces and other illegal charactors to dots "." and Two: remove all punctuation marks altogether. Remove single hashses to get dot separated column name and Remove only single hash to get cleaner name.
+Column names should be renamed to some meaningful names. The labels obtained from variable labels attribute of SPSS file should be cleaned before using as column names of data frame. At this stage this is commented out because using question number in variable name is easier for me. For other users, it might be easier to use meaningful variable names. There are two types of names: one - replaced spaces and other illegal charactors to dots "." and Two: remove all punctuation marks altogether. Remove single hashses to get dot separated column name and Remove only single hash to get cleaner name. This will be uncommented once all the analysis are finished and we want to publish this data to public users.
 ```{r changeNamesOfColumns}
 ##Find variable labels #variableLabels<-attr(mydata,"variable.labels")
 #variableLabels<-character()
@@ -67,8 +67,8 @@ Column names should be renamed to some meaningful names. The labels obtained fro
 #Remove other specific  noises in data
 ```{r}
 #removing age less than 18
-#data[data[,6]<18 & !is.na(data[,6]),6]<-NA
-data[data$Age..Current.<18 & !is.na(data$Age..Current.]$Age..Current.<-NA
+data[data[,6]<18 & !is.na(data[,6]),6]<-NA
+#data[data$Age..Current.<18 & !is.na(data$Age..Current.]$Age..Current.<-NA
 ```
 
 #Now Frequency tables and graphs for all columns
