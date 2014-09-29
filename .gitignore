@@ -9,3 +9,17 @@
 
 # RStudio files
 .Rproj.user/
+
+# Compiled html file
+nepal-trust-2014.html
+
+# Folders with cache and image
+nepal-trust-2014_cache
+nepal-trust-2014_files
+
+# Full data files
+2100.csv
+2100.txt
+
+# Mac file
+.DS_Store
