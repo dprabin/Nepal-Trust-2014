@@ -8,6 +8,9 @@ The Trust survey is conducted all over the world to find citizen's trust on publ
 
 Here, the data is read, merged, cleaned and frequency tables and plos are generated for Exploratory analysis.
 
+###Running the code
+To run this R code, put code and spas file in a folder and open with R. Set working directory to the given folder then run the dmd file. You will need knitr package in addition to foreign, plyr and ggplot2 packages. For that you can run install.packages("knitr") and so on for the packages. I recommend using latest R Studio and R. It can be run from Windows, Mac or Linux systems.
+
 ```{r echo=FALSE}
 #Little bit of housekeeping
 #Check and install missing packages that are required

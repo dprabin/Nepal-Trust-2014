@@ -1,7 +1,8 @@
 ---
-title: "Nepal Trust Survey 2014: Preliminary Findings "
+title: 'Nepal Trust Survey 2014: Preliminary Findings '
 author: "Prabin Babu Dhakal"
 date: "September 22, 2014"
+output: html_document
 ---
 ##Synopsis
 The Trust survey is conducted all over the world to find citizen's trust on public organizations and professions. The trust data was collected in Nepal, in 2014 with about 2400 respondents. The respondents were selected from 48 different Village Development Committees (VDCs) of different constituencies across the country. The respondents were selected from the voter's list. These data was entered into the computer and saved to different filenames for each constituencies. 
@@ -30,17 +31,26 @@ fileList<-dir()
 #SPSS files have .sav extension. filter files with .sav
 fileList<-fileList[grep(".sav",fileList)]
 #read first file to make initial data frame
-data<-read.spss(fileList[1],to.data.frame=TRUE,reencode='utf-8')
+#data<-read.spss(fileList[1],to.data.frame=TRUE,reencode='utf-8')
 #Keep all but first file already read
-fileList<-fileList[2:length(fileList)]
+#fileList<-fileList[2:length(fileList)]
 ```
-
+Only one file is available so skip other files
 ```{r readDataFromAllFiles,message=FALSE,warning=FALSE,cache=TRUE}
 #read.spss gives warnings, but it can be safely ignored
-for(file in fileList) {
-    readData<-read.spss(file,to.data.frame=TRUE,reencode='utf-8')
-    data<-rbind(data,readData[,1:202])
-}
+#for(file in fileList) {
+#    readData<-read.spss(file,to.data.frame=TRUE,reencode='utf-8')
+#    data<-rbind(data,readData[,1:202])
+#}
+```
+Since we have merged all data to one file, we can also skip above steps and read only one merged file. In this case however, We have read individual files instead of merged file.
+```{r readMergedSpssFile,cache=TRUE,warning=FALSE,message=FALSE}
+#Read combined file
+data<-read.spss("Nepal-Trust-Survey-2014-all.sav",to.data.frame=T,reencode="utf-8")
+#Take only first 202 rows
+#attributes(data)
+dim(data)
+#data<-data[,1:202]
 ```
 
 ##Cleaning Data
@@ -54,7 +64,7 @@ dim(data)
 
 ###Find the variable labels
 Data files contains variable labels. We will read these variable labels to a new variable and store for future use.
-```{r}
+```{r findVariableLabels}
 ##Find variable labels #variableLabels<-attr(mydata,"variable.labels")
 variableLabels<-character()
 for(i in 1:202){variableLabels[i]<-attr(data,"variable.labels")[[i]]}
@@ -70,16 +80,80 @@ Column names should be renamed to some meaningful names. The labels obtained fro
 ```
 
 #Remove other specific  noises in data
-```{r}
+Noises that were introduced in data during typing or any phase of data collection are removed.
+
+ - Removed data that contains age<18
+ - Remove data that contains income of 1, 2 ,3 etc
+ - Corrected factor levels in questions bq14-bq17
+ - Code for removing noises is hideen.
+ 
+```{r removeNoiseInData,message=FALSE,warning=FALSE,echo=FALSE, cache=TRUE}
 #removing age less than 18
 data[data[,6]<18 & !is.na(data[,6]),6]<-NA
 #data[data$Age..Current.<18 & !is.na(data$Age..Current.]$Age..Current.<-NA
+#removing income of 0, 1 and 2 
+data[data[,13]<100 & !is.na(data[,13]), 13]<-NA
 ```
 
-#Now Frequency tables and graphs for all columns
-The actual question to the respondents begin from column index 5 and end at column no 202, so we will analyze frequency for culumn numbers from 5 to 202.
-```{r printFrequencyTableAndGraph,cache=TRUE,message=FALSE,warning=FALSE,echo=TRUE}
-for(i in 5:202){
+```{r removeMoreNoiseInQuestion14to17,message=FALSE,warning=FALSE,echo=FALSE, cache=TRUE}
+#replacing numbers in question 14:17 with appropriate labels
+#first, satisfaction
+#x<-factor()
+#x<-ordered(x,levels=c("1 Very Dissatisfied","2 Satisfied","3 Satisfied","4 Satisfied","5 Satisfied","6 Satisfied","7 Satisfied","8 Satisfied","9 Satisfied","10 Very Satisfied","Dont Know"))
+#for(j in c(28,29,32)){
+#    #add required factor levels
+#    data[,j]<-factor(data[,j])
+#    data[,j] <- factor(data[,j], levels = c(levels(data[,j]), levels(x)))
+#    #Remove noises
+#    data[grep("99",data[,j]),j] <- "Dont Know"
+#    data[grep("Don",data[,j]),j] <- "Dont Know"
+#    data[grep("Very [Ss]",data[,j]),j] <- "10 Very Satisfied"
+#    data[grep("^10$",data[,j]),j] <- "10 Very Satisfied"
+#    data[grep("Very [Dd]",data[,j]),j] <- "1 Very Dissatisfied"
+#    data[grep("^1$",data[,j]),j] <- "1 Very Dissatisfied"
+#   data[grep("Not at all",data[,j]),j] <- "1 Very Dissatisfied"
+    #Loop through remaining data and correct
+#    for(i in 2:9){
+#       data[grep(i,data[,j]),j] <- paste(i,"Satisfied")
+#    }
+#    #remove unused factor level and order
+#    data[,j]<-ordered(data[,j],levels=levels(x))
+#}
+
+#Good/Bad
+#x<-factor()
+#x<-ordered(x,levels=c("1 Very Bad","2 Good","3 Good","4 Good","5 Good","6 #Good","7 Good","8 Good","9 Good","10 Very Good","Dont Know"))
+#for(j in c(30,31)){
+#    #Add required factor levels so NA is not introduced
+#    data[,j]<-factor(data[,j])
+#    data[,j] <- factor(data[,j], levels = c(levels(data[,j]), levels(x)))
+#    #Remove Noise
+#    data[grep("99",data[,j]),j] <- "Dont Know"
+#    data[grep("Don",data[,j]),j] <- "Dont Know"
+#    data[grep("Very [Gg]",data[,j]),j] <- "10 Very Good"
+#    data[grep("Very [Ss]",data[,j]),j] <- "10 Very Good"
+#    data[grep("^10$",data[,j]),j] <- "10 Very Good"
+#    data[grep("Very [Bb]",data[,j]),j] <- "1 Very Bad"
+#    data[grep("Very [Dd]",data[,j]),j] <- "1 Very Bad"
+#    data[grep("^1$",data[,j]),j] <- "1 Very Bad"
+#    data[grep("Not at all",data[,j]),j] <- "1 Very Bad"
+#    #Loop through remaining data and correct
+#    for(i in 2:9){
+#       data[grep(i,data[,j]),j] <- paste(i,"Good")
+#    }
+#    #Remove unused factor levels and order
+#    data[,j]<-ordered(data[,j],levels=levels(x))
+#}
+```
+
+#Frequency tables and graphs for all variables
+The actual question to the respondents begin from column index 5 and end at column no 202, so we will analyze frequency for culumn numbers from 5 to 202. All the figures are cannot be explained. The horizontal and vertical mean are not interpretable in every situation. Vertical mean is not interpreatable in nominal data, but interpretable in other data. skipping questions for involvement in institutions and trust basis for individual and institutions.
+```{r printFrequencyTableAndGraph,message=FALSE,warning=FALSE,echo=TRUE, cache=TRUE}
+#cols 15:26=q11; cols 56:67=trust basis for individual and institution
+#also remove other columns 55,86,180,194
+skippedColumns<-c(5:14,27:54,56,67:85,87:179,181:193,195:202)
+
+for(i in skippedColumns){
     x<-data[,i]
     #remove NA before calculating mean
     x <- x[!is.na(x)]
@@ -90,6 +164,11 @@ for(i in 5:202){
     c<-count(x)
     #find percent and mean of frequency
     y<-cbind(c,"percent"=c[,2]/sum(c[2])*100)#,mean=mean(count$freq)
+    
+    #order according to frequency and preserve order for printing
+    #y<-y[order(y$freq),]
+    #y$x<-factor(y$x,levels=y$x,ordered=TRUE)
+    
     #Horizontal and vertical mean
     hm<-mean(y$percent) #mean of percentages
     vm<-mean(as.numeric(x))
@@ -112,8 +191,11 @@ for(i in 5:202){
     #g<-g+scale_y_continuous(breaks = sort(c(seq(min(y$percent), max(y$percent), length.out=5), m)))
     g<-g+geom_vline(aes(xintercept=vm))
     print(g)
+    print("Frequency table")
     print(y)
+    print("Horizontal Mean")
     print(hm)
+    print("Vertical Mean")
     print(vm)
 }
 
@@ -125,16 +207,53 @@ for(i in 5:202){
 ```{r combineQuestion11}
 q11<-data[,15:26]
 for(i in 1:length(q11)){q11[,i]<-as.numeric(q11[,i])}
-m<-as.matrix(q11)
-involve<-col(m)[m==1]
-#inovolve[!is.na(involve)]
-involve<-involve[(!is.na(involve)) & (involve<12)]
-#Now calculate freq and percentages
-c<-count(involve)
+
+###Combine all q11 columns to one
+#define new column to store all data
+q11$new<-0
+#replace all NAs with 0
+q11[is.na(q11)]<-0
+#define temp as logical
+tmp<-q11[1:11]==1
+#gives col index for last match
+q11$new[row(tmp)[tmp]]<-col(tmp)[tmp]
+#remove all data and put only one column
+q11<-q11$new
+#now change 0 in q11 to 12 because with a[0]
+#subscript out of bounds error occur
+q11[q11==0]<-12
+
+#Now define variable labels
+varlabels<-c("NGO","INGO","Trade Union","Student Union","Voluntary Organization","Community Organization","Religious Orginization","Cultural Organization","International Organization","Political Institution","Others","Not available")
+varlabels<-as.data.frame(varlabels)
+#To preserve the original order of varlabels
+#varlabels$varlabels<-factor(varlabels$varlabels,levels=varlabels$varlabels,ordered=TRUE)
+
+#now apply descriptive labels to q11
+q11<-varlabels[q11,1]
+
+#Now remove "Not available" column for plotting
+plotData<-q11[q11!="Not available"]
+
+#Now calculate freq and percentages from factor variable q11
+invcount<-count(plotData)
 #find percent and mean of frequency
-y<-cbind(c,"percent"=c[,2]/sum(c[2])*100)
+y<-cbind(invcount,"percent"=invcount[,2]/sum(invcount[2])*100)
 y<-as.data.frame(y)
+#order according to freq and preserve order for plotting
+y<-y[order(y$freq),]
+y$x<-factor(y$x,levels=y$x,ordered=TRUE)
+
 y
+
+plot(y$x,y$freq)
+g<-ggplot(y,aes(x,percent,order=percent))
+g<-g+geom_bar(color="Red",fill="Salmon",stat="identity")
+g<-g+labs(title="Involvement in Institutions",x="Institutions",y="Frequency")
+g<-g+theme_bw()
+g<-g+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
+g<-g+geom_text(aes(label=paste(round(percent,digits=2),"%",sep="")),size = 3, hjust = 0.5, vjust = -1, position ="stack")
+print(g)
 ```
 
 
@@ -145,47 +264,91 @@ y
 library(ggplot2)
 trustPeople<-data.frame(Col=unlist(data[,57:61]))
 trustPeople<-as.data.frame(trustPeople[!is.na(trustPeople$Col),])
-names(trustPeople)<-c("Col")
+names(trustPeople)<-c("x")
 #sort(unique(bq21))
-d<-table(trustPeople)
-    print(names(d))
-    g<-ggplot(trustPeople,aes(trustPeople$Col))
-    g<-g+geom_bar(color="Red",fill="Salmon")
-    g<-g+labs(title="Trust basis for individual",x="Basis",y="Frequency")
-    g<-g+theme_bw()
-    g<-g+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
-    print(g)
-    print(d)
+d<-count(trustPeople)
+#find percent and mean of frequency
+y<-cbind(d,"percent"=d[,2]/sum(d[2])*100)
+y<-as.data.frame(y)
+#order according to freq and preserve order for plotting
+#not done for this because variable label looks garbage
+#y<-y[order(y$freq),]
+#y$x<-factor(y$x,levels=y$x,ordered=TRUE)
+
+y
+
+#plot(y$x,y$freq)
+g<-ggplot(y,aes(x,percent,order=percent))
+g<-g+geom_bar(color="Red",fill="Salmon",stat="identity")
+g<-g+labs(title="Trust characteristics for individual",x="Trust Basis",y="Percent")
+g<-g+theme_bw()
+g<-g+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
+g<-g+geom_text(aes(label=paste(round(percent,digits=2),"%",sep="")),size = 3, hjust = 0.5, vjust = -1, position ="stack")
+print(g)
+
 ```
 
 ##Now analyzing and generating histogram for trust basis for Institution
 ```{r trustCharactersticsInstitution}
-trustPeople<-data.frame(Col=unlist(data[,62:66]))
-trustPeople<-as.data.frame(trustPeople[!is.na(trustPeople$Col),])
-names(trustPeople)<-c("Col")
+trustInst<-data.frame(Col=unlist(data[,62:66]))
+trustInst<-as.data.frame(trustInst[!is.na(trustInst$Col),])
+names(trustInst)<-c("x")
+#clean data
+#trustInst<-trustInst[trustInst<38,1]
+
 #sort(unique(bq21))
-d<-table(trustPeople)
-    print(names(d))
-    g<-ggplot(trustPeople,aes(trustPeople$Col))
-    g<-g+geom_bar(color="Red",fill="Maroon")
-    g<-g+labs(title="Trust basis for individual",x="Basis",y="Frequency")
-    g<-g+theme_bw()
-    g<-g+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
-    g<-g+geom_line(stat = "hline", yintercept = "mean")
-    print(g)
-    #percent<-as.data.frame(prop.table(d*100)
-    print(d)
+d<-count(trustInst)
+#find percent and mean of frequency
+y<-cbind(d,"percent"=d[,2]/sum(d[2])*100)
+y<-as.data.frame(y)
+#order according to freq and preserve order for plotting
+#not done for this because variable label looks garbage
+#y<-y[order(y$freq),]
+#y$x<-factor(y$x,levels=y$x,ordered=TRUE)
+
+y
+
+g<-ggplot(y,aes(x,percent))
+g<-g+geom_bar(color="Red",fill="Salmon",stat="identity")
+g<-g+labs(title="Trust Basis for Institutions",x="Quality",y="Percent")
+g<-g+theme_bw()
+g<-g+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
+g<-g+geom_text(aes(label=paste(round(percent,digits=2),"%",sep="")),size = 3, hjust = 0.5, vjust = -1, position ="stack")
+print(g)
+
 ```
 
+
+##Comparing multiple variables
 
 ###Gender vs bribe asked
 ```{r genderVersusBribeAsked}
-#qplot(data$Corruption..In.recent.years.have.you.or.your.family.asked.by.bureaucrats.about.bribe.,data=data,fill=Gender,xlab="Have You ever been asked for bribe?")
+qplot(data$bq33,data=data,fill=data$aq1,xlab="Have You ever been asked for bribe?")
 ```
 
+###Should follow Parents order vs Level of corruption
+```{r parentsVersusCorruptionLevel}
+qplot(data$bq32b,data=data,fill=data$bq18a,xlab="Level of Corruption")
+```
+
+###Should follow high officials vs Level of corruption
+```{r officialsVersusCorruptionLevel}
+qplot(data$bq32b,data=data,fill=data$bq18b,xlab="Level of Corruption")
+```
+
+###Should follow rich and powerful vs Level of corruption
+```{r powerfulVersusCorruptionLevel}
+qplot(data$bq32b,data=data,fill=data$bq18c,xlab="Level of Corruption")
+```
 
 ##All the data
-All the data is not necessary to print on html file. It will be printed on csv file.
-```{r}
+All the data is not necessary to print on html file. It will be printed on csv file, which can be further processed in any data analysis software.
+```{r saveCleanedDataToCsvFile,echo=FALSE}
+fileName<-paste(length(data[,1]),"x",length(data[1,]),".csv",sep="")
+write.csv(data,file=fileName)
 #data
+#following too large to call
+#pairs(aq1 ~ ., data=data)
+#make chunks of data and plot pairs plot
 ```
+
